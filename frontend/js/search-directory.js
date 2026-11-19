@@ -80,9 +80,12 @@
       if (currentRequest !== requestNumber) return;
       const businesses = Array.isArray(data.businesses) ? data.businesses : [];
       const paging = data.pagination || {page:1,total:businesses.length,pages:businesses.length ? 1 : 0};
+      const isEmptyDirectory = !query && Number(paging.total) === 0;
       results.innerHTML = businesses.length
         ? businesses.map(renderBusiness).join('')
-        : '<div class="empty card">No matching businesses found. Try another name, owner, category, location or description.</div>';
+        : isEmptyDirectory
+          ? '<div class="empty card"><strong>The connected database has no business directory records yet.</strong><p>If you expected existing records, check the deployed <code>MONGODB_URI</code> or migrate the records into that MongoDB database. Local development data is not copied to a deployment automatically.</p></div>'
+          : '<div class="empty card">No matching businesses found. Try another name, owner, category, location or description.</div>';
       if (summary) summary.textContent = `${Number(paging.total || 0).toLocaleString()} directory ${Number(paging.total) === 1 ? 'record' : 'records'}${query ? ` matching “${query}”` : ''}.${paging.pages > 1 ? ` Page ${paging.page} of ${paging.pages}.` : ''}`;
       if (pagination && paging.pages > 1) {
         pagination.innerHTML = `<button class="ghost" type="button" data-business-page="${Math.max(1,paging.page-1)}" ${paging.page <= 1 ? 'disabled' : ''}>← Previous</button><span>Page ${paging.page} of ${paging.pages}</span><button class="ghost" type="button" data-business-page="${Math.min(paging.pages,paging.page+1)}" ${paging.page >= paging.pages ? 'disabled' : ''}>Next →</button>`;
